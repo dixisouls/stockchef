@@ -70,7 +70,7 @@ frontend/.npm
 frontend/.next/
 frontend/out/
 frontend/.vercel
-frontend/*.tsbuildinfo
+frontend/*.jsbuildinfo
 
 # Logs
 logs/
