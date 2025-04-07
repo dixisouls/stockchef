@@ -12,6 +12,7 @@ import {
   getRecipeHistory,
   suggestRecipes,
   createRecipe,
+  removeRecipeFromHistory,
 } from "../services/api";
 
 const Dashboard = () => {
@@ -75,15 +76,20 @@ const Dashboard = () => {
   };
 
   // Handle recipe removal
-  const handleRemoveRecipe = (recipeId) => {
-    // Update the local state to remove the recipe from display
-    setRecipes((prevRecipes) =>
-      prevRecipes.filter((recipe) => recipe.recipe_id !== recipeId)
-    );
+  const handleRemoveRecipe = async (recipeId) => {
+    try {
+      // Call the API to remove the recipe from history
+      await removeRecipeFromHistory(recipeId);
 
-    // Note: This only removes the recipe from the frontend view.
-    // A backend API endpoint would be needed to actually remove it from the database.
-    // showNotification("Recipe removed from history", "success");
+      // Update the local state to remove the recipe from display
+      setRecipes((prevRecipes) =>
+        prevRecipes.filter((recipe) => recipe.recipe_id !== recipeId)
+      );
+
+      showNotification("Recipe removed from history", "success");
+    } catch (error) {
+      showNotification("Failed to remove recipe from history", "error");
+    }
   };
 
   // Handle recipe suggestions
