@@ -12,10 +12,17 @@
   padding: 5px 10px;
   font-size: 16px;
   color: var(--text-color);
+  transition: background-color 0.2s;
+  border-radius: 4px;
+}
+
+.user-dropdown-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .user-name {
   margin-right: 10px;
+  font-weight: 500;
 }
 
 .user-avatar {
@@ -27,6 +34,7 @@
   background-color: var(--primary-color);
   border-radius: 50%;
   font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-menu {
@@ -34,11 +42,24 @@
   top: 100%;
   right: 0;
   background-color: var(--white);
-  border-radius: 4px;
-  box-shadow: var(--shadow);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  min-width: 180px;
-  margin-top: 5px;
+  min-width: 200px;
+  margin-top: 8px;
+  overflow: hidden;
+  animation: dropdown-fade 0.2s ease-in-out;
+}
+
+@keyframes dropdown-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-item {
@@ -48,10 +69,11 @@
   text-align: left;
   border: none;
   background: none;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--text-color);
   text-decoration: none;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .dropdown-item:hover {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useNotification } from "./Notification";
 
 const RecipePanel = ({
   recipes,
@@ -7,6 +8,7 @@ const RecipePanel = ({
   isSuggestingRecipes,
   onRefresh,
   isRefreshing,
+  onRemoveRecipe,
 }) => {
   return (
     <div className="card">
@@ -51,7 +53,11 @@ const RecipePanel = ({
       ) : (
         <div className="recipe-grid">
           {recipes.map((recipe) => (
-            <RecipeCard key={recipe.recipe_id} recipe={recipe} />
+            <RecipeCard
+              key={recipe.recipe_id}
+              recipe={recipe}
+              onRemove={onRemoveRecipe}
+            />
           ))}
         </div>
       )}
@@ -59,7 +65,9 @@ const RecipePanel = ({
   );
 };
 
-const RecipeCard = ({ recipe }) => {
+const RecipeCard = ({ recipe, onRemove }) => {
+  const { showNotification } = useNotification();
+
   // Format cooking time
   const formatTime = (minutes) => {
     if (!minutes) return "N/A";
@@ -78,11 +86,30 @@ const RecipeCard = ({ recipe }) => {
     return `${hours} hr ${remainingMinutes} min`;
   };
 
+  const handleRemove = (e) => {
+    e.preventDefault(); // Prevent navigating to recipe detail
+    e.stopPropagation(); // Prevent event bubbling
+
+    if (onRemove) {
+      onRemove(recipe.recipe_id);
+      showNotification("Recipe removed from history", "success");
+    }
+  };
+
   return (
     <div className="recipe-card">
       <div className="recipe-card-image"></div>
       <div className="recipe-card-content">
-        <h3 className="recipe-card-title">{recipe.title}</h3>
+        <div className="recipe-card-header">
+          <h3 className="recipe-card-title">{recipe.title}</h3>
+          <button
+            className="recipe-remove-button"
+            onClick={handleRemove}
+            title="Remove from history"
+          >
+            &#8722;
+          </button>
+        </div>
         <p className="recipe-card-description">
           {recipe.short_description || "No description available."}
         </p>

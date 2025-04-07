@@ -57,10 +57,10 @@ const Header = () => {
                   className="dropdown-item"
                   onClick={() => setDropdownOpen(false)}
                 >
-                  Profile Settings
+                  <i className="dropdown-icon">👤</i> Profile Settings
                 </Link>
                 <button className="dropdown-item" onClick={handleLogout}>
-                  Log Out
+                  <i className="dropdown-icon">🚪</i> Log Out
                 </button>
               </div>
             )}

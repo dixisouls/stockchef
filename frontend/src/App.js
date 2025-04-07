@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import "./App.css";
+import "./styles/Components.css"; // Import Components.css for dropdown styling
 
 // Pages
 import LandingPage from "./pages/LandingPage";

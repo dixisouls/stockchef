@@ -160,6 +160,12 @@ body {
   font-size: 24px;
   font-weight: bold;
   color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dashboard-logo:hover {
+  color: var(--accent-color);
 }
 
 .dashboard-nav {
@@ -236,6 +242,28 @@ body {
   gap: 20px;
 }
 
+.recipe-remove-button {
+  background: none;
+  border: none;
+  color: var(--dark-gray);
+  font-size: 20px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.recipe-remove-button:hover {
+  background-color: var(--medium-gray);
+  color: var(--danger-color);
+}
+
 .recipe-card {
   display: flex;
   flex-direction: column;
@@ -262,10 +290,17 @@ body {
   flex-direction: column;
 }
 
+.recipe-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
 .recipe-card-title {
   font-size: 18px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 0;
 }
 
 .recipe-card-description {
@@ -388,6 +423,13 @@ body {
 
 .profile-section {
   margin-bottom: 30px;
+}
+
+/* Icons for dropdown */
+.dropdown-icon {
+  display: inline-block;
+  margin-right: 10px;
+  font-style: normal;
 }
 
 /* Utility classes */

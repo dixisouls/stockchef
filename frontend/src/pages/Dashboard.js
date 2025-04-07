@@ -74,6 +74,18 @@ const Dashboard = () => {
     setInventory(updatedInventory);
   };
 
+  // Handle recipe removal
+  const handleRemoveRecipe = (recipeId) => {
+    // Update the local state to remove the recipe from display
+    setRecipes((prevRecipes) =>
+      prevRecipes.filter((recipe) => recipe.recipe_id !== recipeId)
+    );
+
+    // Note: This only removes the recipe from the frontend view.
+    // A backend API endpoint would be needed to actually remove it from the database.
+    // showNotification("Recipe removed from history", "success");
+  };
+
   // Handle recipe suggestions
   const handleSuggestRecipes = async () => {
     if (inventory.length === 0) {
@@ -161,6 +173,7 @@ const Dashboard = () => {
             isSuggestingRecipes={isSuggestingRecipes}
             onRefresh={refreshData}
             isRefreshing={isRefreshing}
+            onRemoveRecipe={handleRemoveRecipe}
           />
         </div>
       </div>
