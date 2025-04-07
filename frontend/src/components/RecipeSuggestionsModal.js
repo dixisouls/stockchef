@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // Maximum recipes per user
 const MAX_RECIPES_PER_USER = 3;
@@ -8,6 +8,19 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
   const [expandedRecipeIndex, setExpandedRecipeIndex] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [recipeBeingCreated, setRecipeBeingCreated] = useState(null);
+  // Add a ref to scroll into view when recipe is expanded
+  const expandedRecipeRef = useRef(null);
+
+  // Effect to scroll to expanded recipe details when recipe is expanded
+  useEffect(() => {
+    if (expandedRecipeIndex !== null && expandedRecipeRef.current) {
+      // Scroll the expanded recipe's action buttons into view
+      expandedRecipeRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [expandedRecipeIndex]);
 
   const toggleRecipe = (index) => {
     if (expandedRecipeIndex === index) {
@@ -34,7 +47,10 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: "800px" }}>
+      <div
+        className="modal-content"
+        style={{ maxWidth: "800px", maxHeight: "85vh", overflow: "auto" }}
+      >
         <div className="modal-header">
           <h2 className="modal-title">Recipe Suggestions</h2>
           <button
@@ -69,7 +85,10 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
                 when you save a new recipe.
               </div>
 
-              <div className="recipe-suggestion-list">
+              <div
+                className="recipe-suggestion-list"
+                style={{ maxHeight: "none", overflow: "visible" }}
+              >
                 {suggestions.map((recipe, index) => (
                   <div
                     key={index}
@@ -118,7 +137,14 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
                           ))}
                         </ol>
 
-                        <div className="recipe-suggestion-actions">
+                        <div
+                          className="recipe-suggestion-actions"
+                          ref={
+                            expandedRecipeIndex === index
+                              ? expandedRecipeRef
+                              : null
+                          }
+                        >
                           <button
                             className="button button-secondary"
                             onClick={() => toggleRecipe(index)}
