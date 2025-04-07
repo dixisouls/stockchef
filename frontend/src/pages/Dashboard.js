@@ -14,6 +14,9 @@ import {
   createRecipe,
 } from "../services/api";
 
+// Maximum recipes per user
+const MAX_RECIPES_PER_USER = 3;
+
 const Dashboard = () => {
   const [inventory, setInventory] = useState([]);
   const [recipes, setRecipes] = useState([]);
@@ -39,7 +42,8 @@ const Dashboard = () => {
         ]);
 
         setInventory(inventoryData);
-        setRecipes(recipeData);
+        // Ensure we only keep the latest MAX_RECIPES_PER_USER recipes
+        setRecipes(recipeData.slice(0, MAX_RECIPES_PER_USER));
       } catch (error) {
         showNotification("Failed to load dashboard data", "error");
       } finally {
@@ -60,7 +64,8 @@ const Dashboard = () => {
       ]);
 
       setInventory(inventoryData);
-      setRecipes(recipeData);
+      // Ensure we only keep the latest MAX_RECIPES_PER_USER recipes
+      setRecipes(recipeData.slice(0, MAX_RECIPES_PER_USER));
       showNotification("Data refreshed successfully", "success");
     } catch (error) {
       showNotification("Failed to refresh data", "error");
@@ -119,6 +124,10 @@ const Dashboard = () => {
 
       // Close modal
       setShowSuggestionsModal(false);
+
+      // Update recipe list (backend should already handle limiting to MAX_RECIPES_PER_USER)
+      // Refresh the recipe data to get the updated list
+      await refreshData();
 
       // Navigate to recipe detail
       navigate(`/recipe/${newRecipe.recipe_id}`);

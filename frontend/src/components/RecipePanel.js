@@ -1,6 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+// Maximum recipes to display per user
+const MAX_RECIPES_PER_USER = 3;
+
 const RecipePanel = ({
   recipes,
   onSuggestRecipes,
@@ -11,7 +14,9 @@ const RecipePanel = ({
   return (
     <div className="card">
       <div className="panel-header">
-        <h2 className="panel-title">Recipe History</h2>
+        <h2 className="panel-title">
+          Recipe History (Latest {MAX_RECIPES_PER_USER})
+        </h2>
         <div className="panel-actions">
           <button
             className="button button-accent"
@@ -50,7 +55,7 @@ const RecipePanel = ({
         </div>
       ) : (
         <div className="recipe-grid">
-          {recipes.map((recipe) => (
+          {recipes.slice(0, MAX_RECIPES_PER_USER).map((recipe) => (
             <RecipeCard key={recipe.recipe_id} recipe={recipe} />
           ))}
         </div>

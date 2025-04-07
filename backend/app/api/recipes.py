@@ -21,6 +21,9 @@ from app.schemas.recipe import (
 from app.utils.gemini import generate_recipes
 from app.utils.security import get_current_user
 
+# Maximum number of recipes per user
+MAX_RECIPES_PER_USER = 3
+
 router = APIRouter(tags=["recipes"], prefix="/recipes")
 
 
@@ -28,12 +31,13 @@ router = APIRouter(tags=["recipes"], prefix="/recipes")
 async def get_recipe_history(
     current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
-    """Get current user's recipe history"""
+    """Get current user's recipe history, limited to the most recent MAX_RECIPES_PER_USER"""
     history = (
         db.query(Recipe)
         .join(UserRecipeHistory)
         .filter(UserRecipeHistory.user_id == current_user.user_id)
         .order_by(UserRecipeHistory.created_at.desc())
+        .limit(MAX_RECIPES_PER_USER)
         .all()
     )
 
@@ -139,8 +143,49 @@ async def create_recipe(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Create a new recipe and add it to user's history"""
-    # Create recipe
+    """Create a new recipe and add it to user's history. If user already has MAX_RECIPES_PER_USER recipes, delete the oldest one"""
+    
+    # Check current recipe count for the user
+    user_recipe_count = (
+        db.query(UserRecipeHistory)
+        .filter(UserRecipeHistory.user_id == current_user.user_id)
+        .count()
+    )
+    
+    # If user already has MAX_RECIPES_PER_USER recipes, delete the oldest one
+    if user_recipe_count >= MAX_RECIPES_PER_USER:
+        # Find the oldest recipe history entry
+        oldest_history = (
+            db.query(UserRecipeHistory)
+            .filter(UserRecipeHistory.user_id == current_user.user_id)
+            .order_by(UserRecipeHistory.created_at.asc())
+            .first()
+        )
+        
+        if oldest_history:
+            # Check if this recipe is used only by this user
+            recipe_usage_count = (
+                db.query(UserRecipeHistory)
+                .filter(UserRecipeHistory.recipe_id == oldest_history.recipe_id)
+                .count()
+            )
+            
+            # Delete the history entry
+            db.delete(oldest_history)
+            
+            # If this is the only user using this recipe, delete the recipe and its ingredients
+            if recipe_usage_count == 1:
+                # Delete recipe ingredients
+                db.query(RecipeIngredient).filter(
+                    RecipeIngredient.recipe_id == oldest_history.recipe_id
+                ).delete(synchronize_session=False)
+                
+                # Delete the recipe
+                db.query(Recipe).filter(
+                    Recipe.recipe_id == oldest_history.recipe_id
+                ).delete(synchronize_session=False)
+    
+    # Create new recipe
     new_recipe = Recipe(
         title=recipe_data.recipe_name,
         short_description=recipe_data.description,

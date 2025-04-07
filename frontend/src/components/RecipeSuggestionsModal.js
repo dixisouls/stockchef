@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 
+// Maximum recipes per user
+const MAX_RECIPES_PER_USER = 3;
+
 const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -49,6 +52,13 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
                 We found {suggestions.length} recipes you can make with your
                 ingredients:
               </p>
+
+              <div className="recipe-info-note mb-2">
+                <strong>Note:</strong> You can save up to {MAX_RECIPES_PER_USER}{" "}
+                recipes. If you already have {MAX_RECIPES_PER_USER} recipes, the
+                oldest one will be automatically removed when you save a new
+                recipe.
+              </div>
 
               <div className="recipe-suggestion-list">
                 {suggestions.map((recipe, index) => (

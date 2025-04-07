@@ -90,6 +90,14 @@
   overflow-y: auto;
 }
 
+.recipe-info-note {
+  background-color: rgba(240, 226, 158, 0.2);
+  border-left: 4px solid var(--primary-color);
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
 .recipe-suggestion-card {
   background-color: var(--white);
   border: 2px solid var(--medium-gray);
@@ -294,4 +302,9 @@
   color: var(--danger-color);
   font-size: 14px;
   margin-top: 5px;
+}
+
+/* Margin utilities */
+.mb-2 {
+  margin-bottom: 20px;
 }
