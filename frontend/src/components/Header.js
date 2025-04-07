@@ -10,7 +10,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/"); // Changed from "/login" to "/"
   };
 
   // Close dropdown when clicking outside
@@ -33,7 +33,7 @@ const Header = () => {
 
   return (
     <header className="dashboard-header">
-      <Link to="/dashboard" className="dashboard-logo">
+      <Link to="/" className="dashboard-logo">
         StockChef
       </Link>
 
