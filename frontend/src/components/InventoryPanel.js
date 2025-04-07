@@ -29,49 +29,52 @@ const InventoryPanel = ({
   };
 
   return (
-    <div className="card">
+    <>
       <div className="panel-header">
-        <h2 className="panel-title">Your Inventory</h2>
+        <h2>Your Inventory</h2>
         <div className="panel-actions">
           <button
-            className="button"
+            className="button button-primary"
             onClick={onAddItem}
             title="Add item manually"
           >
-            + Add Item
+            <span className="button-icon">+</span>
+            Add Item
           </button>
           <button
-            className="button button-accent"
+            className="button button-accent ml-2"
             onClick={onUploadImage}
             title="Update inventory from photo"
-            style={{ marginLeft: "10px" }}
           >
-            📷 Scan Items
+            <span className="button-icon">📷</span>
+            Scan Items
           </button>
           <button
-            className="button"
+            className="button button-ghost ml-2"
             onClick={onRefresh}
             disabled={isRefreshing}
             title="Refresh inventory"
-            style={{ marginLeft: "10px" }}
           >
-            {isRefreshing ? "⟳ Refreshing..." : "⟳"}
+            <span className="button-icon">{isRefreshing ? "⟳" : "⟳"}</span>
+            {isRefreshing ? "Refreshing..." : "Refresh"}
           </button>
         </div>
       </div>
 
       {inventory.length === 0 ? (
         <div className="empty-state">
-          <p>Your inventory is empty. Add ingredients to get started!</p>
+          <div className="empty-state-icon">🥕</div>
+          <h3 className="empty-state-title">Your inventory is empty</h3>
+          <p className="empty-state-message">
+            Add ingredients to get started with personalized recipes
+          </p>
           <div className="empty-state-actions">
-            <button className="button" onClick={onAddItem}>
+            <button className="button button-primary" onClick={onAddItem}>
+              <span className="button-icon">+</span>
               Add Item Manually
             </button>
-            <button
-              className="button button-accent"
-              onClick={onUploadImage}
-              style={{ marginLeft: "10px" }}
-            >
+            <button className="button button-accent" onClick={onUploadImage}>
+              <span className="button-icon">📷</span>
               Upload a Photo
             </button>
           </div>
@@ -87,14 +90,14 @@ const InventoryPanel = ({
                   onClick={() => handleRemoveItem(item.item_id)}
                   title="Remove item"
                 >
-                  ❌
+                  ×
                 </button>
               </div>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

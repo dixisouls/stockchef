@@ -41,6 +41,7 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
             className="modal-close"
             onClick={onClose}
             disabled={isCreating}
+            aria-label="Close"
           >
             ×
           </button>
@@ -48,22 +49,24 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
 
         <div className="recipe-suggestions">
           {suggestions.length === 0 ? (
-            <p>
-              No recipe suggestions found. Try adding more ingredients to your
-              inventory.
-            </p>
+            <div className="empty-state">
+              <div className="empty-state-icon">🍳</div>
+              <h3 className="empty-state-title">No Recipe Suggestions</h3>
+              <p className="empty-state-message">
+                We couldn't find any recipes that match your inventory. Try
+                adding more ingredients.
+              </p>
+              <button className="button button-primary" onClick={onClose}>
+                OK
+              </button>
+            </div>
           ) : (
             <>
-              <p className="mb-2">
-                We found {suggestions.length} recipes you can make with your
-                ingredients:
-              </p>
-
-              <div className="recipe-info-note mb-2">
+              <div className="recipe-info-note">
                 <strong>Note:</strong> You can save up to {MAX_RECIPES_PER_USER}{" "}
-                recipes. If you already have {MAX_RECIPES_PER_USER} recipes, the
-                oldest one will be automatically removed when you save a new
-                recipe.
+                recipes in your collection. If you already have{" "}
+                {MAX_RECIPES_PER_USER} recipes, the oldest one will be replaced
+                when you save a new recipe.
               </div>
 
               <div className="recipe-suggestion-list">
@@ -85,25 +88,30 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
                         {recipe.description}
                       </p>
                       <div className="recipe-suggestion-meta">
-                        <span className="recipe-suggestion-time">
-                          ⏱️ {recipe.approx_time}
-                        </span>
-                        <span className="recipe-suggestion-ingredients">
-                          🥕 {recipe.ingredients.length} ingredients
-                        </span>
+                        <div className="recipe-suggestion-time">
+                          <span>⏱️</span> {recipe.approx_time}
+                        </div>
+                        <div className="recipe-suggestion-ingredients">
+                          <span>🥕</span> {recipe.ingredients.length}{" "}
+                          ingredients
+                        </div>
                       </div>
                     </div>
 
                     {expandedRecipeIndex === index && (
                       <div className="recipe-suggestion-details">
-                        <h4>Ingredients</h4>
+                        <h4 className="recipe-suggestion-section-title">
+                          Ingredients
+                        </h4>
                         <ul className="recipe-suggestion-ingredients-list">
                           {recipe.ingredients.map((ingredient, i) => (
                             <li key={i}>{ingredient}</li>
                           ))}
                         </ul>
 
-                        <h4>Instructions</h4>
+                        <h4 className="recipe-suggestion-section-title">
+                          Instructions
+                        </h4>
                         <ol className="recipe-suggestion-steps">
                           {recipe.steps.map((step, i) => (
                             <li key={i}>{step}</li>
@@ -112,13 +120,24 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
 
                         <div className="recipe-suggestion-actions">
                           <button
-                            className="button button-accent"
+                            className="button button-secondary"
+                            onClick={() => toggleRecipe(index)}
+                          >
+                            Collapse
+                          </button>
+                          <button
+                            className="button button-primary"
                             onClick={() => handleCreateRecipe(recipe)}
                             disabled={isCreating}
                           >
-                            {isCreating && recipeBeingCreated === recipe
-                              ? "Saving..."
-                              : "Save Recipe"}
+                            {isCreating && recipeBeingCreated === recipe ? (
+                              <>
+                                <span className="spinner-sm mr-2"></span>
+                                Saving...
+                              </>
+                            ) : (
+                              "Save Recipe"
+                            )}
                           </button>
                         </div>
                       </div>
@@ -129,7 +148,7 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
 
               <div className="modal-actions">
                 <button
-                  className="button"
+                  className="button button-secondary"
                   onClick={onClose}
                   disabled={isCreating}
                 >

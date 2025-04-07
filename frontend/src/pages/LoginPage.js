@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNotification } from "../components/Notification";
@@ -12,8 +12,15 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { showNotification } = useNotification();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,7 +74,23 @@ const LoginPage = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2 className="auth-title">Log In to StockChef</h2>
+        <div className="auth-logo">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"
+              fill="currentColor"
+            />
+          </svg>
+          StockChef
+        </div>
+
+        <h2 className="auth-title">Welcome Back</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -82,6 +105,7 @@ const LoginPage = () => {
               value={formData.email}
               onChange={handleChange}
               disabled={isSubmitting}
+              placeholder="your@email.com"
             />
             {errors.email && <div className="form-error">{errors.email}</div>}
           </div>
@@ -98,6 +122,7 @@ const LoginPage = () => {
               value={formData.password}
               onChange={handleChange}
               disabled={isSubmitting}
+              placeholder="••••••••"
             />
             {errors.password && (
               <div className="form-error">{errors.password}</div>
@@ -106,15 +131,21 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="button button-accent"
-            style={{ width: "100%" }}
+            className="button button-primary w-full mt-4"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Logging in..." : "Log In"}
+            {isSubmitting ? (
+              <>
+                <span className="spinner-sm mr-2"></span>
+                Logging in...
+              </>
+            ) : (
+              "Log In"
+            )}
           </button>
         </form>
 
-        <Link to="/register" className="auth-link">
+        <Link to="/register" className="auth-link mt-4">
           Don't have an account? Sign up
         </Link>
       </div>

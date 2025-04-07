@@ -16,18 +16,27 @@ const RegisterPage = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [preferences, setPreferences] = useState({
     dietary_preferences: [],
     cuisines: [],
   });
 
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const { showNotification } = useNotification();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   // Fetch available preferences
   useEffect(() => {
     const fetchPreferences = async () => {
+      setIsLoading(true);
       try {
         const data = await getPreferences();
         setPreferences(data);
@@ -48,6 +57,8 @@ const RegisterPage = () => {
         }
       } catch (error) {
         showNotification("Failed to load preferences", "error");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -126,12 +137,78 @@ const RegisterPage = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="auth-container">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <div className="auth-logo">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"
+              fill="currentColor"
+            />
+          </svg>
+          StockChef
+        </div>
+
         <h2 className="auth-title">Create an Account</h2>
 
         <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label" htmlFor="first_name">
+                First Name
+              </label>
+              <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                className="form-input"
+                value={formData.first_name}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                placeholder="First Name"
+              />
+              {errors.first_name && (
+                <div className="form-error">{errors.first_name}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="last_name">
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                className="form-input"
+                value={formData.last_name}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                placeholder="Last Name"
+              />
+              {errors.last_name && (
+                <div className="form-error">{errors.last_name}</div>
+              )}
+            </div>
+          </div>
+
           <div className="form-group">
             <label className="form-label" htmlFor="email">
               Email
@@ -144,6 +221,7 @@ const RegisterPage = () => {
               value={formData.email}
               onChange={handleChange}
               disabled={isSubmitting}
+              placeholder="your@email.com"
             />
             {errors.email && <div className="form-error">{errors.email}</div>}
           </div>
@@ -160,45 +238,10 @@ const RegisterPage = () => {
               value={formData.password}
               onChange={handleChange}
               disabled={isSubmitting}
+              placeholder="••••••••"
             />
             {errors.password && (
               <div className="form-error">{errors.password}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="first_name">
-              First Name
-            </label>
-            <input
-              type="text"
-              id="first_name"
-              name="first_name"
-              className="form-input"
-              value={formData.first_name}
-              onChange={handleChange}
-              disabled={isSubmitting}
-            />
-            {errors.first_name && (
-              <div className="form-error">{errors.first_name}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="last_name">
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="last_name"
-              name="last_name"
-              className="form-input"
-              value={formData.last_name}
-              onChange={handleChange}
-              disabled={isSubmitting}
-            />
-            {errors.last_name && (
-              <div className="form-error">{errors.last_name}</div>
             )}
           </div>
 
@@ -252,15 +295,21 @@ const RegisterPage = () => {
 
           <button
             type="submit"
-            className="button button-accent"
-            style={{ width: "100%" }}
+            className="button button-primary w-full mt-4"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Creating Account..." : "Create Account"}
+            {isSubmitting ? (
+              <>
+                <span className="spinner-sm mr-2"></span>
+                Creating Account...
+              </>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 
-        <Link to="/login" className="auth-link">
+        <Link to="/login" className="auth-link mt-4">
           Already have an account? Log in
         </Link>
       </div>

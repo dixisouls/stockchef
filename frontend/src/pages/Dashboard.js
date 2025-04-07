@@ -6,6 +6,7 @@ import RecipePanel from "../components/RecipePanel";
 import RecipeSuggestionsModal from "../components/RecipeSuggestionsModal";
 import AddItemModal from "../components/AddItemModal";
 import UploadImageModal from "../components/UploadImageModal";
+import Footer from "../components/Footer";
 import { useNotification } from "../components/Notification";
 import {
   getInventory,
@@ -140,39 +141,61 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="dashboard loading">
+      <div className="page-container">
         <Header />
-        <div className="loading-spinner">Loading...</div>
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard">
+    <div className="page-container">
       <Header />
 
-      <div className="dashboard-content container">
-        <div className="dashboard-panel">
-          <InventoryPanel
-            inventory={inventory}
-            onInventoryChange={handleInventoryChange}
-            onAddItem={() => setShowAddItemModal(true)}
-            onUploadImage={() => setShowUploadImageModal(true)}
-            onRefresh={refreshData}
-            isRefreshing={isRefreshing}
-          />
-        </div>
+      <main className="page-content">
+        <div className="container">
+          <h1 className="mb-6">Your Dashboard</h1>
 
-        <div className="dashboard-panel">
-          <RecipePanel
-            recipes={recipes}
-            onSuggestRecipes={handleSuggestRecipes}
-            isSuggestingRecipes={isSuggestingRecipes}
-            onRefresh={refreshData}
-            isRefreshing={isRefreshing}
-          />
+          <div className="dashboard-layout">
+            <div className="card inventory-panel">
+              <InventoryPanel
+                inventory={inventory}
+                onInventoryChange={handleInventoryChange}
+                onAddItem={() => setShowAddItemModal(true)}
+                onUploadImage={() => setShowUploadImageModal(true)}
+                onRefresh={refreshData}
+                isRefreshing={isRefreshing}
+              />
+            </div>
+
+            <div className="card recipe-panel">
+              <RecipePanel
+                recipes={recipes}
+                onSuggestRecipes={handleSuggestRecipes}
+                isSuggestingRecipes={isSuggestingRecipes}
+                onRefresh={refreshData}
+                isRefreshing={isRefreshing}
+              />
+            </div>
+          </div>
+
+          {inventory.length === 0 && recipes.length === 0 && (
+            <div className="alert alert-info mt-6">
+              <h4 className="mb-2">Getting Started with StockChef</h4>
+              <p>
+                Welcome to your dashboard! To get started, add ingredients to
+                your inventory either manually or by uploading a photo. Once you
+                have ingredients, you can get recipe suggestions based on what
+                you have available.
+              </p>
+            </div>
+          )}
         </div>
-      </div>
+      </main>
+
+      <Footer />
 
       {/* Modals */}
       {showSuggestionsModal && (

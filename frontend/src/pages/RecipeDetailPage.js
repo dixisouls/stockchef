@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { getRecipeDetail, cookRecipe } from "../services/api";
 import { useNotification } from "../components/Notification";
 
@@ -12,6 +13,7 @@ const RecipeDetailPage = () => {
   const [recipe, setRecipe] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCooking, setIsCooking] = useState(false);
+  const [checkedIngredients, setCheckedIngredients] = useState({});
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -19,6 +21,13 @@ const RecipeDetailPage = () => {
       try {
         const recipeData = await getRecipeDetail(id);
         setRecipe(recipeData);
+
+        // Initialize all ingredients as unchecked
+        const initialCheckedState = {};
+        recipeData.ingredients.forEach((ing) => {
+          initialCheckedState[ing.ingredient_name] = false;
+        });
+        setCheckedIngredients(initialCheckedState);
       } catch (error) {
         showNotification("Failed to load recipe", "error");
       } finally {
@@ -28,6 +37,13 @@ const RecipeDetailPage = () => {
 
     fetchRecipe();
   }, [id, showNotification]);
+
+  const toggleIngredient = (ingredientName) => {
+    setCheckedIngredients((prev) => ({
+      ...prev,
+      [ingredientName]: !prev[ingredientName],
+    }));
+  };
 
   const handleCookRecipe = async () => {
     setIsCooking(true);
@@ -42,27 +58,58 @@ const RecipeDetailPage = () => {
     }
   };
 
+  // Format cooking time
+  const formatTime = (minutes) => {
+    if (!minutes) return "Not specified";
+
+    if (minutes < 60) {
+      return `${minutes} minutes`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    if (remainingMinutes === 0) {
+      return `${hours} hour${hours > 1 ? "s" : ""}`;
+    }
+
+    return `${hours} hour${hours > 1 ? "s" : ""} ${remainingMinutes} minute${
+      remainingMinutes > 1 ? "s" : ""
+    }`;
+  };
+
   if (isLoading) {
     return (
-      <div>
+      <div className="page-container">
         <Header />
-        <div className="loading-spinner">Loading recipe...</div>
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   if (!recipe) {
     return (
-      <div>
+      <div className="page-container">
         <Header />
-        <div className="container">
-          <div className="error-message">
-            Recipe not found.{" "}
-            <button onClick={() => navigate("/dashboard")}>
+        <div className="container py-6">
+          <div className="card text-center py-8">
+            <div className="empty-state-icon">🍽️</div>
+            <h2 className="empty-state-title">Recipe Not Found</h2>
+            <p className="empty-state-message">
+              We couldn't find the recipe you're looking for.
+            </p>
+            <button
+              className="button button-primary mt-4"
+              onClick={() => navigate("/dashboard")}
+            >
               Back to Dashboard
             </button>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -73,67 +120,100 @@ const RecipeDetailPage = () => {
     .filter((line) => line.trim());
 
   return (
-    <div>
+    <div className="page-container">
       <Header />
 
-      <div className="container recipe-detail">
-        <div className="recipe-header">
-          <button
-            className="back-button"
-            onClick={() => navigate("/dashboard")}
-          >
-            ← Back to Dashboard
-          </button>
+      <main className="page-content">
+        <div className="container recipe-detail-container">
+          <div className="recipe-detail-header">
+            <button
+              className="back-button"
+              onClick={() => navigate("/dashboard")}
+            >
+              ← Back to Dashboard
+            </button>
 
-          <h1 className="recipe-title">{recipe.title}</h1>
+            <h1 className="recipe-detail-title">{recipe.title}</h1>
 
-          {recipe.short_description && (
-            <p className="recipe-description">{recipe.short_description}</p>
-          )}
+            {recipe.short_description && (
+              <p className="recipe-detail-description">
+                {recipe.short_description}
+              </p>
+            )}
 
-          <div className="recipe-meta">
-            <div className="recipe-meta-item">
-              <span className="recipe-meta-icon">⏱️</span>
-              <span className="recipe-meta-text">
-                {recipe.total_time_minutes
-                  ? `${recipe.total_time_minutes} minutes`
-                  : "Time not specified"}
-              </span>
+            <div className="recipe-detail-meta">
+              <div className="recipe-detail-meta-item">
+                <span className="text-2xl">⏱️</span>
+                <span>{formatTime(recipe.total_time_minutes)}</span>
+              </div>
+              <div className="recipe-detail-meta-item">
+                <span className="text-2xl">🥣</span>
+                <span>{recipe.ingredients.length} ingredients</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="recipe-content">
-          <div className="recipe-section">
-            <h2 className="recipe-section-title">Ingredients</h2>
-            <ul className="recipe-ingredients">
-              {recipe.ingredients.map((ingredient, index) => (
-                <li key={index} className="recipe-ingredient-item">
-                  {ingredient.ingredient_name}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <div className="recipe-detail-content">
+            <div className="recipe-detail-section">
+              <h2 className="recipe-detail-section-title">Ingredients</h2>
+              <ul className="recipe-ingredients-list">
+                {recipe.ingredients.map((ingredient, index) => (
+                  <li
+                    key={index}
+                    className="recipe-ingredient-item"
+                    style={{
+                      textDecoration: checkedIngredients[
+                        ingredient.ingredient_name
+                      ]
+                        ? "line-through"
+                        : "none",
+                      opacity: checkedIngredients[ingredient.ingredient_name]
+                        ? 0.6
+                        : 1,
+                    }}
+                  >
+                    <div
+                      className={`ingredient-check ${
+                        checkedIngredients[ingredient.ingredient_name]
+                          ? "checked"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        toggleIngredient(ingredient.ingredient_name)
+                      }
+                    ></div>
+                    {ingredient.ingredient_name}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="recipe-section">
-            <h2 className="recipe-section-title">Instructions</h2>
-            <ol className="recipe-steps">
-              {instructions.map((step, index) => (
-                <li key={index} className="recipe-step-item">
-                  <div className="recipe-step-number">{index + 1}</div>
-                  <div className="recipe-step-content">{step}</div>
-                </li>
-              ))}
-            </ol>
+            <div className="recipe-detail-section">
+              <h2 className="recipe-detail-section-title">Instructions</h2>
+              <ol className="recipe-steps-list">
+                {instructions.map((step, index) => (
+                  <li key={index} className="recipe-step-item">
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
 
           <div className="recipe-action">
             <button
-              className="button button-accent"
+              className="button button-accent button-large"
               onClick={handleCookRecipe}
               disabled={isCooking}
             >
-              {isCooking ? "Updating Inventory..." : "I Made This! 🍳"}
+              {isCooking ? (
+                <>
+                  <span className="spinner-sm mr-2"></span>
+                  Updating Inventory...
+                </>
+              ) : (
+                "I Made This! 🍳"
+              )}
             </button>
             <p className="recipe-action-hint">
               Clicking this button will remove used ingredients from your
@@ -141,7 +221,9 @@ const RecipeDetailPage = () => {
             </p>
           </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 };

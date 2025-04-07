@@ -1,31 +1,41 @@
-import React, { useState, useEffect } from "react";
-import "../styles/Notification.css";
+import React, { useState, useEffect, createContext, useContext } from "react";
 
+// Single notification component
 const Notification = ({ message, type = "info", duration = 3000, onClose }) => {
   const [visible, setVisible] = useState(true);
+  const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
     if (duration) {
       const timer = setTimeout(() => {
-        setVisible(false);
-        if (onClose) onClose();
+        startExit();
       }, duration);
 
       return () => clearTimeout(timer);
     }
-  }, [duration, onClose]);
+  }, [duration]);
+
+  const startExit = () => {
+    setExiting(true);
+    setTimeout(() => {
+      setVisible(false);
+      if (onClose) onClose();
+    }, 300); // Match animation duration
+  };
 
   if (!visible) return null;
 
   return (
-    <div className={`notification notification-${type}`}>
+    <div
+      className={`notification notification-${type} ${
+        exiting ? "notification-exit" : ""
+      }`}
+    >
       <div className="notification-content">{message}</div>
       <button
         className="notification-close"
-        onClick={() => {
-          setVisible(false);
-          if (onClose) onClose();
-        }}
+        onClick={startExit}
+        aria-label="Close notification"
       >
         ×
       </button>
@@ -33,27 +43,19 @@ const Notification = ({ message, type = "info", duration = 3000, onClose }) => {
   );
 };
 
-export default Notification;
-
 // NotificationContext for global notifications
-export const NotificationContext = React.createContext({
+export const NotificationContext = createContext({
   showNotification: () => {},
+  removeNotification: () => {},
 });
 
+// Provider component to wrap app
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
   const showNotification = (message, type = "info", duration = 3000) => {
     const id = Date.now();
     setNotifications((prev) => [...prev, { id, message, type, duration }]);
-
-    // Auto-remove after duration
-    if (duration) {
-      setTimeout(() => {
-        removeNotification(id);
-      }, duration);
-    }
-
     return id;
   };
 
@@ -83,4 +85,7 @@ export const NotificationProvider = ({ children }) => {
   );
 };
 
-export const useNotification = () => React.useContext(NotificationContext);
+// Custom hook to use the notification context
+export const useNotification = () => useContext(NotificationContext);
+
+export default Notification;

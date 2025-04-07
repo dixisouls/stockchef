@@ -127,6 +127,7 @@ const UploadImageModal = ({ onClose, onUploadSuccess }) => {
             className="modal-close"
             onClick={handleClose}
             disabled={isUploading}
+            aria-label="Close"
           >
             ×
           </button>
@@ -146,7 +147,7 @@ const UploadImageModal = ({ onClose, onUploadSuccess }) => {
                 ) : (
                   <div className="upload-placeholder">
                     <div className="upload-icon">📷</div>
-                    <p>Click or drag an image here</p>
+                    <h3>Click or drag an image here</h3>
                     <p className="upload-hint">
                       Take a photo of your fridge, pantry, or ingredients
                     </p>
@@ -164,19 +165,25 @@ const UploadImageModal = ({ onClose, onUploadSuccess }) => {
 
               <div className="upload-actions">
                 <button
-                  className="button"
+                  className="button button-secondary"
                   onClick={handleClose}
                   disabled={isUploading}
                 >
                   Cancel
                 </button>
                 <button
-                  className="button button-accent"
+                  className="button button-primary"
                   onClick={handleUpload}
                   disabled={!selectedFile || isUploading}
-                  style={{ marginLeft: "10px" }}
                 >
-                  {isUploading ? "Processing..." : "Process Image"}
+                  {isUploading ? (
+                    <>
+                      <span className="spinner-sm mr-2"></span>
+                      Processing...
+                    </>
+                  ) : (
+                    "Process Image"
+                  )}
                 </button>
               </div>
             </>
@@ -186,7 +193,7 @@ const UploadImageModal = ({ onClose, onUploadSuccess }) => {
                 {uploadResult.items_added > 0 ? "✅" : "ℹ️"}
               </div>
 
-              <h3 className="upload-result-title">
+              <h3 className="mb-4">
                 {uploadResult.items_added > 0
                   ? `Added ${uploadResult.items_added} new items to your inventory!`
                   : "No new items added to inventory"}
@@ -195,7 +202,7 @@ const UploadImageModal = ({ onClose, onUploadSuccess }) => {
               {uploadResult.detected_items &&
                 uploadResult.detected_items.length > 0 && (
                   <div className="detected-items">
-                    <h4>Detected Items:</h4>
+                    <h4 className="mb-2">Detected Items:</h4>
                     <ul className="detected-items-list">
                       {uploadResult.detected_items.map((item, index) => (
                         <li key={index} className="detected-item">
@@ -207,9 +214,8 @@ const UploadImageModal = ({ onClose, onUploadSuccess }) => {
                 )}
 
               <button
-                className="button button-accent"
+                className="button button-primary mt-6"
                 onClick={handleClose}
-                style={{ marginTop: "20px" }}
               >
                 Done
               </button>
