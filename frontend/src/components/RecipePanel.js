@@ -66,8 +66,6 @@ const RecipePanel = ({
 };
 
 const RecipeCard = ({ recipe, onRemove }) => {
-  const { showNotification } = useNotification();
-
   // Format cooking time
   const formatTime = (minutes) => {
     if (!minutes) return "N/A";
@@ -91,8 +89,9 @@ const RecipeCard = ({ recipe, onRemove }) => {
     e.stopPropagation(); // Prevent event bubbling
 
     if (onRemove) {
+      // Just call onRemove without showing notification here
       onRemove(recipe.recipe_id);
-      showNotification("Recipe removed from history", "success");
+      // Removed success notification to avoid showing it before API call completes
     }
   };
 
