@@ -144,14 +144,14 @@ async def create_recipe(
     db: Session = Depends(get_db),
 ):
     """Create a new recipe and add it to user's history. If user already has MAX_RECIPES_PER_USER recipes, delete the oldest one"""
-    
+
     # Check current recipe count for the user
     user_recipe_count = (
         db.query(UserRecipeHistory)
         .filter(UserRecipeHistory.user_id == current_user.user_id)
         .count()
     )
-    
+
     # If user already has MAX_RECIPES_PER_USER recipes, delete the oldest one
     if user_recipe_count >= MAX_RECIPES_PER_USER:
         # Find the oldest recipe history entry
@@ -161,7 +161,7 @@ async def create_recipe(
             .order_by(UserRecipeHistory.created_at.asc())
             .first()
         )
-        
+
         if oldest_history:
             # Check if this recipe is used only by this user
             recipe_usage_count = (
@@ -169,22 +169,22 @@ async def create_recipe(
                 .filter(UserRecipeHistory.recipe_id == oldest_history.recipe_id)
                 .count()
             )
-            
+
             # Delete the history entry
             db.delete(oldest_history)
-            
+
             # If this is the only user using this recipe, delete the recipe and its ingredients
             if recipe_usage_count == 1:
                 # Delete recipe ingredients
                 db.query(RecipeIngredient).filter(
                     RecipeIngredient.recipe_id == oldest_history.recipe_id
                 ).delete(synchronize_session=False)
-                
+
                 # Delete the recipe
                 db.query(Recipe).filter(
                     Recipe.recipe_id == oldest_history.recipe_id
                 ).delete(synchronize_session=False)
-    
+
     # Create new recipe
     new_recipe = Recipe(
         title=recipe_data.recipe_name,
