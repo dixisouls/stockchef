@@ -127,7 +127,7 @@ const RecipeDetailPage = () => {
         <div className="container recipe-detail-container">
           <div className="recipe-detail-header">
             <button
-              className="back-button"
+              className="button button-secondary"
               onClick={() => navigate("/dashboard")}
             >
               ← Back to Dashboard
