@@ -16,25 +16,27 @@ logger = logging.getLogger(__name__)
 # Initialize Gemini API with API key
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
+
 def extract_items_from_image(image_data: bytes) -> Dict:
     """
     Extract food items from an image using Gemini API
-    
+
     Args:
         image_data: Raw image bytes
-    
+
     Returns:
         dict: A dictionary containing status and items list
     """
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
-        
+
         # Define the image extraction prompt with examples
         contents = [
             types.Content(
                 role="user",
                 parts=[
-                    types.Part.from_text("""
+                    types.Part.from_text(
+                        """
                     You will be given an image. You need to extract all the food items from the image. 
                     Basically the image can be their fridge, their shelves or straight up food. 
                     Extract all the food items from the image and return them. The output json should have two things.
@@ -43,18 +45,21 @@ def extract_items_from_image(image_data: bytes) -> Dict:
 
                     If no food found the items list should be empty.
                     Just return the items, no quantity, unit etc, just the items
-                    """),
+                    """
+                    ),
                 ],
             ),
             types.Content(
                 role="model",
                 parts=[
-                    types.Part.from_text("""
+                    types.Part.from_text(
+                        """
                     {
                       "status": "404",
                       "items": []
                     }
-                    """),
+                    """
+                    ),
                 ],
             ),
             types.Content(
@@ -64,67 +69,71 @@ def extract_items_from_image(image_data: bytes) -> Dict:
                 ],
             ),
         ]
-        
+
         # Define the response configuration
         generate_content_config = types.GenerateContentConfig(
             response_mime_type="application/json",
         )
-        
+
         # Generate the response
         response = model.generate_content(
             contents=contents,
             config=generate_content_config,
         )
-        
+
         # Parse JSON response
         try:
             result = json.loads(response.text)
-            logger.info(f"Successfully extracted items: {len(result.get('items', []))} items found")
+            logger.info(
+                f"Successfully extracted items: {len(result.get('items', []))} items found"
+            )
             return result
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {e}")
             logger.error(f"Response text: {response.text}")
             return {"status": "404", "items": []}
-        
+
     except Exception as e:
         logger.error(f"Error in extract_items_from_image: {str(e)}")
         return {"status": "404", "items": []}
+
 
 def generate_recipes(
     ingredients: List[str],
     dietary_preference: str,
     cuisine_preference: str,
-    previous_recipes: List[str] = []
+    previous_recipes: List[str] = [],
 ) -> Dict:
     """
     Generate recipe suggestions based on ingredients and preferences
-    
+
     Args:
         ingredients: List of available ingredients
         dietary_preference: User's dietary preference (vegetarian, vegan, etc.)
         cuisine_preference: User's preferred cuisine (Italian, Indian, etc.)
         previous_recipes: List of previously cooked recipes
-        
+
     Returns:
         dict: A dictionary containing recipe suggestions
     """
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
-        
+
         # Build the input payload
         input_payload = {
             "ingredients": ingredients,
             "dietary_preference": dietary_preference,
             "cuisine_preference": cuisine_preference,
-            "previous_recipes": previous_recipes
+            "previous_recipes": previous_recipes,
         }
-        
+
         # Define the recipe generation prompt with examples
         contents = [
             types.Content(
                 role="user",
                 parts=[
-                    types.Part.from_text("""
+                    types.Part.from_text(
+                        """
                     You will be given a list of ingredients, dietary preferences (vegan, vegetarian [dairy but no eggs], halal, non-veg, etc.) 
                     and preferred cuisine (Indian, Mexican, Japanese, etc.). You will also have a previous recipe made. Return three recipes. 
                     Assume the basic things such as water, salt, sugar, ginger, etc., spices and condiments to be available. 
@@ -162,13 +171,15 @@ def generate_recipes(
                              nothing else such as 1 pound, for garnish etc, just the ingredient list.
                         4.5) approx time to make
                         4.6) Actual step by step recipe.(this should be in extreme detail guiding the user step by step for each task)
-                    """),
+                    """
+                    ),
                 ],
             ),
             types.Content(
                 role="model",
                 parts=[
-                    types.Part.from_text("""
+                    types.Part.from_text(
+                        """
                     {
                       "recipes": [
                         {
@@ -261,7 +272,8 @@ def generate_recipes(
                       ],
                       "status": 200
                     }
-                    """),
+                    """
+                    ),
                 ],
             ),
             types.Content(
@@ -271,29 +283,31 @@ def generate_recipes(
                 ],
             ),
         ]
-        
+
         # Define the system instructions
         system_instruction = [
-            types.Part.from_text("""
+            types.Part.from_text(
+                """
             You are an expert chef. You know all the recipes in the world. 
             Given the ingredient list, dietary preference, cuisine preference, 
             you can suggest any recipe keeping in mind these things. 
             You can also change recipes according to available ingredients and dietary preference.
-            """)
+            """
+            )
         ]
-        
+
         # Define the response configuration
         generate_content_config = types.GenerateContentConfig(
             response_mime_type="application/json",
             system_instruction=system_instruction,
         )
-        
+
         # Generate the response
         response = model.generate_content(
             contents=contents,
             config=generate_content_config,
         )
-        
+
         # Parse JSON response
         try:
             result = json.loads(response.text)
@@ -303,7 +317,7 @@ def generate_recipes(
             logger.error(f"Failed to parse JSON response: {e}")
             logger.error(f"Response text: {response.text}")
             return {"status": 400, "recipes": []}
-            
+
     except Exception as e:
         logger.error(f"Error in generate_recipes: {str(e)}")
         return {"status": 400, "recipes": []}

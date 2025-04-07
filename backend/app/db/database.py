@@ -10,6 +10,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+
 def get_db():
     """Get database session"""
     db = SessionLocal()
@@ -17,6 +18,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 def create_tables():
     """Create tables in the database if they don't exist"""

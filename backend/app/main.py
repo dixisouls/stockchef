@@ -35,19 +35,22 @@ os.makedirs("uploads", exist_ok=True)
 # Serve uploaded files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+
 @app.on_event("startup")
 async def startup():
     # Create tables if they don't exist
     create_tables()
 
+
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "message": "StockChef API is running"}
+
 
 @app.get("/")
 async def root():
     return {
         "message": "Welcome to StockChef API",
         "version": "1.0.0",
-        "documentation": "/docs"
+        "documentation": "/docs",
     }

@@ -13,6 +13,7 @@ from app.utils.security import create_access_token, get_password_hash, verify_pa
 
 router = APIRouter(tags=["authentication"], prefix="/auth")
 
+
 @router.post("/register", response_model=Token)
 async def register(user_data: UserRegistration, db: Session = Depends(get_db)):
     """
@@ -22,30 +23,31 @@ async def register(user_data: UserRegistration, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
-    
+
     # Check if dietary preference exists
-    dietary_pref = db.query(DietaryPreference).filter(
-        DietaryPreference.preference_id == user_data.dietary_preference_id
-    ).first()
+    dietary_pref = (
+        db.query(DietaryPreference)
+        .filter(DietaryPreference.preference_id == user_data.dietary_preference_id)
+        .first()
+    )
     if not dietary_pref:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid dietary preference"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid dietary preference"
         )
-    
+
     # Check if cuisine preference exists
-    cuisine_pref = db.query(Cuisine).filter(
-        Cuisine.cuisine_id == user_data.cuisine_preference_id
-    ).first()
+    cuisine_pref = (
+        db.query(Cuisine)
+        .filter(Cuisine.cuisine_id == user_data.cuisine_preference_id)
+        .first()
+    )
     if not cuisine_pref:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid cuisine preference"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid cuisine preference"
         )
-    
+
     # Create new user
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
@@ -54,36 +56,36 @@ async def register(user_data: UserRegistration, db: Session = Depends(get_db)):
         first_name=user_data.first_name,
         last_name=user_data.last_name,
     )
-    
+
     # Add preferences
     new_user.dietary_preferences.append(dietary_pref)
     new_user.preferred_cuisines.append(cuisine_pref)
-    
+
     # Save to database
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    
+
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": new_user.email},
-        expires_delta=access_token_expires
+        data={"sub": new_user.email}, expires_delta=access_token_expires
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     OAuth2 compatible token login endpoint
     """
     # Find the user
     user = db.query(User).filter(User.email == form_data.username).first()
-    
+
     # Verify user exists and password is correct
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
@@ -91,15 +93,15 @@ async def login_for_access_token(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email},
-        expires_delta=access_token_expires
+        data={"sub": user.email}, expires_delta=access_token_expires
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.post("/login", response_model=Token)
 async def login(user_login: UserLogin, db: Session = Depends(get_db)):
@@ -108,7 +110,7 @@ async def login(user_login: UserLogin, db: Session = Depends(get_db)):
     """
     # Find the user
     user = db.query(User).filter(User.email == user_login.email).first()
-    
+
     # Verify user exists and password is correct
     if not user or not verify_password(user_login.password, user.password_hash):
         raise HTTPException(
@@ -116,12 +118,11 @@ async def login(user_login: UserLogin, db: Session = Depends(get_db)):
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email},
-        expires_delta=access_token_expires
+        data={"sub": user.email}, expires_delta=access_token_expires
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
