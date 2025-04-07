@@ -1,0 +1,5 @@
+pytest==8.2.1
+pytest-cov==5.0.0
+httpx==0.28.1
+pillow==11.1.0
+pytest-mock==3.12.0
