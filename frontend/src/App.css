@@ -1,38 +1,466 @@
-.App {
+/* Main color theme */
+:root {
+  --primary-color: #f0e29e;
+  --primary-dark: #e3d17f;
+  --accent-color: #5f9ea0;
+  --text-color: #333333;
+  --light-gray: #f5f5f5;
+  --medium-gray: #e0e0e0;
+  --dark-gray: #666666;
+  --danger-color: #e74c3c;
+  --success-color: #2ecc71;
+  --white: #ffffff;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-color);
+  background-color: var(--light-gray);
+}
+
+/* Common components */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.button {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: var(--primary-dark);
+}
+
+.button-accent {
+  background-color: var(--accent-color);
+  color: var(--white);
+}
+
+.button-accent:hover {
+  background-color: #4a8789;
+}
+
+.button-danger {
+  background-color: var(--danger-color);
+  color: var(--white);
+}
+
+.button-danger:hover {
+  background-color: #c0392b;
+}
+
+/* Form styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--medium-gray);
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+/* Auth pages */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--primary-color);
+  background-image: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--primary-dark) 100%
+  );
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 30px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.auth-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+/* Dashboard */
+.dashboard {
+  min-height: 100vh;
+  padding-top: 80px; /* Space for header */
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: var(--white);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1000;
+}
+
+.dashboard-logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.dashboard-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-nav-item {
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.dashboard-content {
+  flex: 1;
+  display: flex;
+  padding: 20px;
+}
+
+.dashboard-panel {
+  flex: 1;
+  margin: 0 10px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.panel-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Inventory */
+.inventory-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 8px;
+  background-color: var(--white);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+}
+
+.inventory-item-name {
+  font-weight: 500;
+}
+
+.inventory-actions {
+  display: flex;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--dark-gray);
+  transition: color 0.2s;
+}
+
+.action-button:hover {
+  color: var(--danger-color);
+}
+
+/* Recipe cards */
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.recipe-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.recipe-card:hover {
+  transform: translateY(-5px);
+}
+
+.recipe-card-image {
+  height: 160px;
+  background-color: var(--primary-color);
+}
+
+.recipe-card-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.recipe-card-description {
+  flex: 1;
+  color: var(--dark-gray);
+  margin-bottom: 12px;
+}
+
+.recipe-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recipe-time {
+  display: flex;
+  align-items: center;
+  color: var(--dark-gray);
+  font-size: 14px;
+}
+
+/* Recipe detail */
+.recipe-detail {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.recipe-header {
+  margin-bottom: 30px;
+}
+
+.recipe-title {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.recipe-description {
+  color: var(--dark-gray);
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.recipe-meta {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.recipe-meta-item {
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  color: var(--dark-gray);
+}
+
+.recipe-section {
+  margin-bottom: 30px;
+}
+
+.recipe-section-title {
+  font-size: 20px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.recipe-ingredients {
+  list-style-type: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.recipe-ingredient-item {
+  padding: 10px;
+  background-color: var(--light-gray);
+  border-radius: 4px;
+}
+
+.recipe-steps {
+  list-style-type: none;
+  padding: 0;
+}
+
+.recipe-step-item {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.recipe-step-number {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: 16px;
+}
+
+.recipe-step-content {
+  flex: 1;
+  padding-top: 5px;
+}
+
+.recipe-action {
+  text-align: center;
+  margin-top: 30px;
+}
+
+/* Profile page */
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-section {
+  margin-bottom: 30px;
+}
+
+/* Utility classes */
+.text-center {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.mt-1 {
+  margin-top: 10px;
+}
+.mt-2 {
+  margin-top: 20px;
+}
+.mb-1 {
+  margin-bottom: 10px;
+}
+.mb-2 {
+  margin-bottom: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
+  z-index: 1000;
 }
 
-.App-link {
-  color: #61dafb;
+.modal-content {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 20px;
+  width: 500px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column;
   }
-  to {
-    transform: rotate(360deg);
+
+  .dashboard-panel {
+    margin: 10px 0;
+  }
+
+  .recipe-grid {
+    grid-template-columns: 1fr;
   }
 }
