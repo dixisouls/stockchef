@@ -1,8 +1,10 @@
 from typing import List
+import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
+from app.config import settings, limiter
 from app.db.database import get_db
 from app.db.models import (
     InventoryItem,
@@ -23,6 +25,9 @@ from app.utils.security import get_current_user
 
 # Maximum number of recipes per user
 MAX_RECIPES_PER_USER = 3
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["recipes"], prefix="/recipes")
 
@@ -62,14 +67,19 @@ async def get_recipe_detail(
 
 
 @router.post("/suggest", response_model=List[RecipeSuggestion])
+@limiter.limit(settings.GEMINI_API_RATE_LIMIT)
 async def suggest_recipes(
-    request: RecipeSuggestionRequest,
+    request: Request,
+    recipe_request: RecipeSuggestionRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Suggest recipes based on user's inventory and preferences"""
+    """Suggest recipes based on user's inventory and preferences (rate limited to 5/min and 500/day)"""
+    # Log API call
+    logger.info(f"Gemini API call: generate_recipes by user {current_user.user_id}")
+
     # Get user's inventory
-    if not request.custom_ingredients:
+    if not recipe_request.custom_ingredients:
         inventory_items = (
             db.query(InventoryItem)
             .filter(InventoryItem.user_id == current_user.user_id)
@@ -78,7 +88,7 @@ async def suggest_recipes(
 
         ingredients = [item.name for item in inventory_items]
     else:
-        ingredients = request.custom_ingredients
+        ingredients = recipe_request.custom_ingredients
 
     # Get user's preferences
     if len(current_user.dietary_preferences) == 0:
@@ -93,7 +103,7 @@ async def suggest_recipes(
 
     # Get previously made recipes
     previous_recipes = []
-    if not request.ignore_history:
+    if not recipe_request.ignore_history:
         history = (
             db.query(Recipe.title)
             .join(UserRecipeHistory)

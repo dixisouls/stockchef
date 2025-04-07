@@ -1,10 +1,11 @@
 import os
 from typing import List
+import logging
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Request
 from sqlalchemy.orm import Session
 
-from app.config import settings
+from app.config import settings, limiter
 from app.db.database import get_db
 from app.db.models import InventoryItem, User
 from app.schemas.inventory import (
@@ -16,6 +17,9 @@ from app.utils.gemini import extract_items_from_image
 from app.utils.security import get_current_user
 
 router = APIRouter(tags=["inventory"], prefix="/inventory")
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[InventoryItemSchema])
@@ -90,12 +94,19 @@ async def remove_inventory_item(
 
 
 @router.post("/upload-image", response_model=dict)
+@limiter.limit(settings.GEMINI_API_RATE_LIMIT)
 async def upload_inventory_image(
+    request: Request,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update inventory from image using Gemini API"""
+    """Update inventory from image using Gemini API (rate limited to 5/min and 500/day)"""
+    # Log API call
+    logger.info(
+        f"Gemini API call: extract_items_from_image by user {current_user.user_id}"
+    )
+
     # Check file type
     if not file.content_type.startswith("image/"):
         raise HTTPException(

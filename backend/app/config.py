@@ -2,11 +2,21 @@ import os
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 from typing import Optional
+from slowapi import Limiter
 
 # Load the .env file
 load_dotenv(
     dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
 )
+
+
+# Global key function for rate limiting across all requests
+def global_limit_key(*args, **kwargs):
+    return "global"
+
+
+# Create a rate limiter with global scope
+limiter = Limiter(key_func=global_limit_key)
 
 
 class Settings(BaseSettings):
@@ -33,6 +43,9 @@ class Settings(BaseSettings):
     # Upload settings
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
+
+    # Rate limits
+    GEMINI_API_RATE_LIMIT: str = "5/minute;500/day"
 
     class Config:
         env_file = ".env"
