@@ -4,30 +4,32 @@ import React, { useState } from "react";
 const MAX_RECIPES_PER_USER = 3;
 
 const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  // Track which recipe is expanded (if any)
+  const [expandedRecipeIndex, setExpandedRecipeIndex] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [recipeBeingCreated, setRecipeBeingCreated] = useState(null);
 
-  const handleSelectRecipe = (recipe) => {
-    setSelectedRecipe(recipe);
-  };
-
-  const handleCreateRecipe = async () => {
-    if (!selectedRecipe) return;
-
-    setIsCreating(true);
-
-    try {
-      await onCreateRecipe(selectedRecipe);
-    } catch (error) {
-      console.error("Failed to create recipe:", error);
-      setIsCreating(false);
+  const toggleRecipe = (index) => {
+    if (expandedRecipeIndex === index) {
+      // If clicking on already expanded recipe, collapse it
+      setExpandedRecipeIndex(null);
+    } else {
+      // Otherwise, expand the clicked recipe and collapse any other
+      setExpandedRecipeIndex(index);
     }
   };
 
-  // Format time string to extract minutes
-  const extractTimeMinutes = (timeStr) => {
-    const match = timeStr.match(/(\d+)/);
-    return match ? parseInt(match[0], 10) : 30; // Default to 30 minutes if parsing fails
+  const handleCreateRecipe = async (recipe) => {
+    setIsCreating(true);
+    setRecipeBeingCreated(recipe);
+
+    try {
+      await onCreateRecipe(recipe);
+    } catch (error) {
+      console.error("Failed to create recipe:", error);
+      setIsCreating(false);
+      setRecipeBeingCreated(null);
+    }
   };
 
   return (
@@ -35,7 +37,11 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
       <div className="modal-content" style={{ maxWidth: "800px" }}>
         <div className="modal-header">
           <h2 className="modal-title">Recipe Suggestions</h2>
-          <button className="modal-close" onClick={onClose}>
+          <button
+            className="modal-close"
+            onClick={onClose}
+            disabled={isCreating}
+          >
             ×
           </button>
         </div>
@@ -65,26 +71,30 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
                   <div
                     key={index}
                     className={`recipe-suggestion-card ${
-                      selectedRecipe === recipe ? "selected" : ""
+                      expandedRecipeIndex === index ? "expanded" : ""
                     }`}
-                    onClick={() => handleSelectRecipe(recipe)}
                   >
-                    <h3 className="recipe-suggestion-title">
-                      {recipe.recipe_name}
-                    </h3>
-                    <p className="recipe-suggestion-description">
-                      {recipe.description}
-                    </p>
-                    <div className="recipe-suggestion-meta">
-                      <span className="recipe-suggestion-time">
-                        ⏱️ {recipe.approx_time}
-                      </span>
-                      <span className="recipe-suggestion-ingredients">
-                        🥕 {recipe.ingredients.length} ingredients
-                      </span>
+                    <div
+                      className="recipe-suggestion-header"
+                      onClick={() => toggleRecipe(index)}
+                    >
+                      <h3 className="recipe-suggestion-title">
+                        {recipe.recipe_name}
+                      </h3>
+                      <p className="recipe-suggestion-description">
+                        {recipe.description}
+                      </p>
+                      <div className="recipe-suggestion-meta">
+                        <span className="recipe-suggestion-time">
+                          ⏱️ {recipe.approx_time}
+                        </span>
+                        <span className="recipe-suggestion-ingredients">
+                          🥕 {recipe.ingredients.length} ingredients
+                        </span>
+                      </div>
                     </div>
 
-                    {selectedRecipe === recipe && (
+                    {expandedRecipeIndex === index && (
                       <div className="recipe-suggestion-details">
                         <h4>Ingredients</h4>
                         <ul className="recipe-suggestion-ingredients-list">
@@ -99,27 +109,31 @@ const RecipeSuggestionsModal = ({ suggestions, onClose, onCreateRecipe }) => {
                             <li key={i}>{step}</li>
                           ))}
                         </ol>
+
+                        <div className="recipe-suggestion-actions">
+                          <button
+                            className="button button-accent"
+                            onClick={() => handleCreateRecipe(recipe)}
+                            disabled={isCreating}
+                          >
+                            {isCreating && recipeBeingCreated === recipe
+                              ? "Saving..."
+                              : "Save Recipe"}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
                 ))}
               </div>
 
-              <div className="recipe-suggestion-actions">
+              <div className="modal-actions">
                 <button
                   className="button"
                   onClick={onClose}
                   disabled={isCreating}
                 >
                   Cancel
-                </button>
-                <button
-                  className="button button-accent"
-                  onClick={handleCreateRecipe}
-                  disabled={!selectedRecipe || isCreating}
-                  style={{ marginLeft: "10px" }}
-                >
-                  {isCreating ? "Saving..." : "Save Recipe"}
                 </button>
               </div>
             </>

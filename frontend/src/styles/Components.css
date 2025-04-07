@@ -103,17 +103,39 @@
   border: 2px solid var(--medium-gray);
   border-radius: 8px;
   padding: 16px;
-  cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
+  margin-bottom: 15px;
 }
 
 .recipe-suggestion-card:hover {
   border-color: var(--primary-color);
 }
 
-.recipe-suggestion-card.selected {
+.recipe-suggestion-card.expanded {
   border-color: var(--primary-color);
   background-color: rgba(240, 226, 158, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Recipe suggestion card header (clickable part) */
+.recipe-suggestion-header {
+  cursor: pointer;
+  position: relative;
+  padding-right: 20px;
+}
+
+/* Add a dropdown indicator */
+.recipe-suggestion-header::after {
+  content: "▼";
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.recipe-suggestion-card.expanded .recipe-suggestion-header::after {
+  transform: rotate(180deg);
 }
 
 .recipe-suggestion-title {
@@ -137,7 +159,20 @@
 .recipe-suggestion-details {
   margin-top: 20px;
   padding-top: 15px;
+  padding-bottom: 10px;
   border-top: 1px solid var(--medium-gray);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .recipe-suggestion-ingredients-list {
@@ -169,6 +204,8 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--medium-gray);
 }
 
 /* Upload image modal */
