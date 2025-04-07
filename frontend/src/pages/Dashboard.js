@@ -12,7 +12,6 @@ import {
   getRecipeHistory,
   suggestRecipes,
   createRecipe,
-  removeRecipeFromHistory,
 } from "../services/api";
 
 const Dashboard = () => {
@@ -73,23 +72,6 @@ const Dashboard = () => {
   // Handle inventory updates
   const handleInventoryChange = (updatedInventory) => {
     setInventory(updatedInventory);
-  };
-
-  // Handle recipe removal
-  const handleRemoveRecipe = async (recipeId) => {
-    try {
-      // Call the API to remove the recipe from history
-      await removeRecipeFromHistory(recipeId);
-
-      // Update the local state to remove the recipe from display
-      setRecipes((prevRecipes) =>
-        prevRecipes.filter((recipe) => recipe.recipe_id !== recipeId)
-      );
-
-      showNotification("Recipe removed from history", "success");
-    } catch (error) {
-      showNotification("Failed to remove recipe from history", "error");
-    }
   };
 
   // Handle recipe suggestions
@@ -179,7 +161,6 @@ const Dashboard = () => {
             isSuggestingRecipes={isSuggestingRecipes}
             onRefresh={refreshData}
             isRefreshing={isRefreshing}
-            onRemoveRecipe={handleRemoveRecipe}
           />
         </div>
       </div>

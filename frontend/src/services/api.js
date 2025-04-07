@@ -165,9 +165,3 @@ export const cookRecipe = async (recipeId) => {
     method: "POST",
   });
 };
-
-export const removeRecipeFromHistory = async (recipeId) => {
-  return authFetch(`/recipes/${recipeId}/history`, {
-    method: "DELETE",
-  });
-};

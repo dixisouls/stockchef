@@ -232,46 +232,6 @@ async def cook_recipe(
     }
 
 
-@router.delete("/{recipe_id}/history", response_model=dict)
-async def remove_recipe_from_history(
-    recipe_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Remove a recipe from the user's history"""
-    # Check if recipe exists
-    recipe = db.query(Recipe).filter(Recipe.recipe_id == recipe_id).first()
-    if not recipe:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found"
-        )
-
-    # Find the history entry
-    history_entry = (
-        db.query(UserRecipeHistory)
-        .filter(
-            UserRecipeHistory.user_id == current_user.user_id,
-            UserRecipeHistory.recipe_id == recipe_id,
-        )
-        .first()
-    )
-
-    if not history_entry:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Recipe not found in user's history"
-        )
-
-    # Delete the history entry
-    db.delete(history_entry)
-    db.commit()
-
-    return {
-        "message": "Recipe removed from history successfully",
-        "recipe_id": recipe_id,
-    }
-
-
 def _parse_time_to_minutes(time_str: str) -> int:
     """Parse time string like '45 minutes' to minutes integer"""
     try:
